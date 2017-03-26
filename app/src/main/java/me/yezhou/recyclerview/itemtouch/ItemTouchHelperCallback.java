@@ -73,6 +73,12 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
     public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         // 恢复
         viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        //bug：在侧滑删除的时候，然后再上下滑动页面，结果有的条目不显示了，出现空白的条目
+        //原因：ListView和RecyclerView都会有复用条目itemView，改变条目状态属性会导致上面的问题
+        //解决：在clearView回调方法里恢复这些条目的状态
+        viewHolder.itemView.setAlpha(1);
+        viewHolder.itemView.setScaleX(1);
+        viewHolder.itemView.setScaleY(1);
         super.clearView(recyclerView, viewHolder);
     }
 
@@ -87,6 +93,14 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
             viewHolder.itemView.setScaleX(alpha); //1~0
             viewHolder.itemView.setScaleY(alpha); //1~0
         }
+        /*
+        //条目侧滑一半的效果：判断是否超出或者达到width/2
+        if (dX <= 0 && Math.abs(dX) <= viewHolder.itemView.getWidth() / 2.0f) {
+            viewHolder.itemView.setTranslationX(-0.5f * viewHolder.itemView.getWidth());
+        } else {
+            viewHolder.itemView.setTranslationX(dX);
+        }
+        */
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
     }
 }
